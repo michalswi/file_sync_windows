@@ -7,6 +7,7 @@ import hashlib
 
 #without raw string error
 dir_base = r'C:\Users\szp\Desktop\backup_files'
+#dir_base = r'C:\Users\szp\Desktop\New_folder'
 dir_usb = r'E:\backup_files'
 
 """
@@ -39,22 +40,38 @@ print(dir_lst)
 """
 #https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
 #11254
-count = 0
-num = 0
-file_dict = {}
-lst = []
-for path, dirs, files in os.walk(dir_base):
-  #print path
-  for f in files:
-	#print path+f
-	#count should be equal to the number of items in file_dict.
-	count += 1
-	with open(path + r'\{}'.format(f)) as of:
-		fc = of.read()
-		num += 1
-		file_dict[hashlib.md5(fc).hexdigest()]=( path + r'\{}'.format(f) )
-			
-print(len(file_dict.items()))
-print(count)
-print(num)
+
+base_dict = {}
+
+def f_base():
+
+	#count should be equal to the number of items in base_dict.
+	count = 0
+	for path, dirs, files in os.walk(dir_base):
+	  for f in files:
+		if os.path.isfile(path + r'\{}'.format(f)):
+			#print path+f
+			count += 1
+			with open(path + r'\{}'.format(f), 'rb') as of:
+				fc = of.read()
+				base_dict[path + r'\{}'.format(f)]=( hashlib.md5(fc).hexdigest() )
+				
+	print(len(base_dict.items()))
+	print(count)
+
+f_base()
+
+
+def f_usb():
+
+	#count should be equal to the number of items in base_dict.
+	count = 0
+	for path, dirs, files in os.walk(dir_base):
+	  for f in files:
+		if os.path.isfile(path + r'\{}'.format(f)):
+			#print path+f
+			count += 1
+			with open(path + r'\{}'.format(f), 'rb') as of:
+				fc = of.read()
+				base_dict[path + r'\{}'.format(f)]=( hashlib.md5(fc).hexdigest() )
 
