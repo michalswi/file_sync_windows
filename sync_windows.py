@@ -83,7 +83,16 @@ def update_files():
     #https://stackoverflow.com/questions/123198/how-do-i-copy-a-file-in-python
     for key, value in to_be_changed.items():
         print(key)
-        copy2(key, '/home/miswierc/Desktop/backup_files/')    
+        key_base = key.replace('usb_files', 'backup_files')
+        # if you have '/dir1/dir2/file' it will remove 'file' and create '/dir1/dir2'
+        #windows
+        #TO BE DONE
+        #linux
+        if not os.path.exists("/".join(key_base.split('/')[:-1])):
+            os.mkdir("/".join(key_base.split('/')[:-1]))
+        
+        copy2(key, key_base)
+       
     print("=== updated ===")
 
 def fire():
