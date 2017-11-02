@@ -5,6 +5,7 @@ import hashlib
 import sys
 from multiprocessing import Process, Queue
 import time
+from shutil import copy2
 
 #windows: without raw string -> error
 #dir_base = r'C:\Users\szp\Desktop\backup_files'
@@ -14,43 +15,13 @@ dir_usb = r'E:\backup_files'
 dir_base = r'{}'.format(sys.argv[1])
 dir_usb = r'{}'.format(sys.argv[2])
 
-"""
-#main directory and files
-file_dict = {}
-dir_lst = []
-
-def first_run():
-	
-	for i in os.listdir(dir_base):
-		#print(i)
-		# distinguish between files and directories
-		# for file
-		if os.path.isfile(dir_base + r'\{}'.format(i)):
-			with open(dir_base + r'\{}'.format(i)) as file:
-				fc = file.read()
-				#checksum:full_path_to_file_and_filename
-				file_dict[hashlib.md5(fc).hexdigest()]=(dir_base + r'\{}'.format(i))
-		# for directory
-		elif os.path.isdir(dir_base + r'\{}'.format(i)):		
-			dir_lst.append(dir_base + r'\{}'.format(i))
-			
-		else:
-			print("dupa")
-			
-first_run()
-
-print(file_dict.items())
-print(dir_lst)			
-"""
-#os.walk()
-#https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
-
 def f_base(q):
     """ add local files (as a key) and their checksum (as a value) to dict """
     base_dict = {}
     
 	#count should be equal to the number of items in base_dict.
     count = 0
+    #https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
     for path, dirs, files in os.walk(dir_base):
         for f in files:
             #if os.path.isfile(path + r'\{}'.format(f)):        # windows \
@@ -87,17 +58,38 @@ def f_usb(q2):
     q2.put(usb_dict) 
 
 
+to_be_changed = {}
+
+
 def compare_dicts():
-    """ compare both dictionaries and find updated/missing files"""
+    """ compare both dictionaries and find updated/new files"""
     
     print("=== start checking ===")
+    for key, value in a_usb_dict.items():
+        if value not in a_base_dict.values():
+            print(key, value)
+            to_be_changed[key] = value
+    print("=== checked ===")
     
-    for key, value in usb_dict.items():
-        if value not in base_dict.values():
-            print key, value
+    if to_be_changed:
+        return 1
+    else:
+        return 0
 
-#https://stackoverflow.com/questions/17927173/collecting-result-from-different-process-in-python
-if __name__=='__main__':
+#  SHOULD CHECK IF DIRECTORY EXIST BEFORE COPYING
+def update_files():
+    
+    print("=== updating ===")
+    #https://stackoverflow.com/questions/123198/how-do-i-copy-a-file-in-python
+    for key, value in to_be_changed.items():
+        print(key)
+        copy2(key, '/home/miswierc/Desktop/backup_files/')    
+    print("=== updated ===")
+
+def fire():
+    """ run... """
+    global a_base_dict, a_usb_dict
+    
     q = Queue()
     q2 = Queue()
     
@@ -106,17 +98,26 @@ if __name__=='__main__':
     p2 = Process(target=f_usb, args=(q2,))
     p2.start()    
     
-    base_dict = q.get()
-    usb_dict = q2.get()
+    a_base_dict = q.get()
+    a_usb_dict = q2.get()
     
     
     p1.join()
     p2.join()
     
-    print(len(base_dict))
-    print(len(usb_dict))
+    #print(len(a_base_dict))
+    #print(len(a_usb_dict))
 
-    time.sleep(10)
-    compare_dicts()
+    #time.sleep(10)
+    
+    # 'if' statement is needed to not run 'update_files()' if there are no files to be updated
+    if compare_dicts():
+        update_files()
+    else:
+        print("=== completed ===")
+
+#https://stackoverflow.com/questions/17927173/collecting-result-from-different-process-in-python
+if __name__=='__main__':
+    fire()
   
     
