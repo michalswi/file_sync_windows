@@ -9,11 +9,14 @@ from shutil import copy2
 
 #windows: without raw string -> error
 #dir_base = r'C:\Users\szp\Desktop\backup_files'
-#dir_base = r'C:\Users\szp\Desktop\New_folder'
-dir_usb = r'E:\backup_files'
+#dir_usb = r'E:\backup_files'
 
+#linux
 dir_base = r'{}'.format(sys.argv[1])
 dir_usb = r'{}'.format(sys.argv[2])
+
+winbslash = "\\"
+lnxslash = "/"
 
 def f_base(q):
     """ add local files (as a key) and their checksum (as a value) to dict """
@@ -47,10 +50,13 @@ def f_usb(q2):
     count = 0
     for path, dirs, files in os.walk(dir_usb):
         for f in files:
+            #if os.path.isfile(path + r'\{}'.format(f)):
             if os.path.isfile(path + r'/{}'.format(f)):
                 count += 1
+                #with open(path + r'\{}'.format(f), 'rb') as of:
                 with open(path + r'/{}'.format(f), 'rb') as of:
                     fc = of.read()
+                    #usb_dict[path + r'\{}'.format(f)]=( hashlib.md5(fc).hexdigest() )
                     usb_dict[path + r'/{}'.format(f)]=( hashlib.md5(fc).hexdigest() )
                     
     print("usb dict:", len(usb_dict.items()))
@@ -84,12 +90,13 @@ def update_files():
     for key, value in to_be_changed.items():
         print(key)
         key_base = key.replace('usb_files', 'backup_files')
-        # if you have '/dir1/dir2/file' it will remove 'file' and create '/dir1/dir2'
+        # split.. : if you have '/dir1/dir2/file' it will remove 'file' and create '/dir1/dir2'
         #windows
-        #TO BE DONE
+        #if not os.path.exists("\".join(key_base.split('\')[:-1])):
+            #os.makedirs("\".join(key_base.split('\')[:-1]))        
         #linux
         if not os.path.exists("/".join(key_base.split('/')[:-1])):
-            os.mkdir("/".join(key_base.split('/')[:-1]))
+            os.makedirs("/".join(key_base.split('/')[:-1]))
         
         copy2(key, key_base)
        
