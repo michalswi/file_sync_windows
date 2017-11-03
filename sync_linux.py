@@ -7,23 +7,24 @@ from multiprocessing import Process, Queue
 import time
 from shutil import copy2
 
-#windows: without raw string -> error
-dir_base = r'C:\Users\szp\Desktop\backup_files'
-dir_usb = r'E:\backup_files'
+dir_base = r'{}'.format(sys.argv[1])
+dir_usb = r'{}'.format(sys.argv[2])
 
 to_be_changed = {}
 
 def f_base(q):
     """ add local files (as a key) and their checksum (as a value) to dict """
     base_dict = {}
+    #count should be equal to the number of items in base_dict.
     count = 0
+    #https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
     for path, dirs, files in os.walk(dir_base):
         for f in files:
-            if os.path.isfile(path + r'\{}'.format(f)):
+            if os.path.isfile(path + r'/{}'.format(f)):
                 count += 1
-                with open(path + r'\{}'.format(f), 'rb') as of:
+                with open(path + r'/{}'.format(f), 'rb') as of:
                     fc = of.read()
-                    base_dict[path + r'\{}'.format(f)]=( hashlib.md5(fc).hexdigest() )
+                    base_dict[path + r'/{}'.format(f)]=( hashlib.md5(fc).hexdigest() )
     print("base dict:", len(base_dict.items()))
     print("base:", count)
     q.put(base_dict)
@@ -31,14 +32,15 @@ def f_base(q):
 def f_usb(q2):
     """ add usb files (as a key) and their checksum (as a value) to dict """
     usb_dict = {}
+    #count should be equal to the number of items in base_dict.
     count = 0
     for path, dirs, files in os.walk(dir_usb):
         for f in files:
-            if os.path.isfile(path + r'\{}'.format(f)):
+            if os.path.isfile(path + r'/{}'.format(f)):
                 count += 1
-                with open(path + r'\{}'.format(f), 'rb') as of:
+                with open(path + r'/{}'.format(f), 'rb') as of:
                     fc = of.read()
-                    usb_dict[path + r'\{}'.format(f)]=( hashlib.md5(fc).hexdigest() )
+                    usb_dict[path + r'/{}'.format(f)]=( hashlib.md5(fc).hexdigest() )
     print("usb dict:", len(usb_dict.items()))
     print("usb:", count)
     q2.put(usb_dict) 
@@ -59,11 +61,13 @@ def compare_dicts():
 def update_files():
     """ base on data from compare_dicts() it will update files """
     print("=== updating ===")
+    #https://stackoverflow.com/questions/123198/how-do-i-copy-a-file-in-python
     for key, value in to_be_changed.items():
         print(key)
         key_base = key.replace('usb_files', 'backup_files')
-        if not os.path.exists('\\'.join(key_base.split('\\')[:-1])):
-            os.makedirs('\\'.join(key_base.split('\\')[:-1]))        
+        # split.. : if you have '/dir1/dir2/file' it will remove 'file' and create '/dir1/dir2'
+        if not os.path.exists("/".join(key_base.split('/')[:-1])):
+            os.makedirs("/".join(key_base.split('/')[:-1]))
         copy2(key, key_base)
     print("=== updated ===")
 
@@ -71,6 +75,7 @@ def fire():
     """ run... """
     global a_base_dict, a_usb_dict
 
+    #https://stackoverflow.com/questions/17927173/collecting-result-from-different-process-in-python    
     q = Queue()
     q2 = Queue()
     
@@ -85,6 +90,11 @@ def fire():
     
     p1.join()
     p2.join()
+    
+    #print(len(a_base_dict))
+    #print(len(a_usb_dict))
+
+    #time.sleep(10)
     
     # 'if' statement is needed to not run 'update_files()' if there are no files to be updated
     if compare_dicts():
