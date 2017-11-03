@@ -17,12 +17,12 @@ dir_usb = r'{}'.format(sys.argv[2])
 
 winbslash = "\\"
 lnxslash = "/"
+to_be_changed = {}
 
 def f_base(q):
     """ add local files (as a key) and their checksum (as a value) to dict """
     base_dict = {}
-    
-	#count should be equal to the number of items in base_dict.
+    #count should be equal to the number of items in base_dict.
     count = 0
     #https://stackoverflow.com/questions/9727673/list-directory-tree-structure-in-python
     for path, dirs, files in os.walk(dir_base):
@@ -35,17 +35,13 @@ def f_base(q):
                     fc = of.read()
                     #base_dict[path + r'\{}'.format(f)]=( hashlib.md5(fc).hexdigest() )
                     base_dict[path + r'/{}'.format(f)]=( hashlib.md5(fc).hexdigest() )
-                    
     print("base dict:", len(base_dict.items()))
     print("base:", count)
     q.put(base_dict)
-    
 
 def f_usb(q2):
     """ add usb files (as a key) and their checksum (as a value) to dict """
-
     usb_dict = {}
-    
     #count should be equal to the number of items in base_dict.
     count = 0
     for path, dirs, files in os.walk(dir_usb):
@@ -58,33 +54,24 @@ def f_usb(q2):
                     fc = of.read()
                     #usb_dict[path + r'\{}'.format(f)]=( hashlib.md5(fc).hexdigest() )
                     usb_dict[path + r'/{}'.format(f)]=( hashlib.md5(fc).hexdigest() )
-                    
     print("usb dict:", len(usb_dict.items()))
     print("usb:", count)
     q2.put(usb_dict) 
 
-
-to_be_changed = {}
-
-
 def compare_dicts():
     """ compare both dictionaries and find updated/new files"""
-    
     print("=== start checking ===")
     for key, value in a_usb_dict.items():
         if value not in a_base_dict.values():
             print(key, value)
             to_be_changed[key] = value
     print("=== checked ===")
-    
     if to_be_changed:
         return 1
     else:
         return 0
 
-#  SHOULD CHECK IF DIRECTORY EXIST BEFORE COPYING
 def update_files():
-    
     print("=== updating ===")
     #https://stackoverflow.com/questions/123198/how-do-i-copy-a-file-in-python
     for key, value in to_be_changed.items():
@@ -97,9 +84,7 @@ def update_files():
         #linux
         if not os.path.exists("/".join(key_base.split('/')[:-1])):
             os.makedirs("/".join(key_base.split('/')[:-1]))
-        
         copy2(key, key_base)
-       
     print("=== updated ===")
 
 def fire():
