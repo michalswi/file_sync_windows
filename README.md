@@ -6,13 +6,13 @@ All you have to do is provide two directories when running the script like:
 
 ```sh
 #WINDOWS way
-you have to hardcode directories in script:
+you have to setup directories in script:
 dir_base = r'<destination>'
 dir_usb = r'<source>'
 
 python sync_windows.py 
 
-#LINUX way
+#LINUX way TO DO
 python sync_linux.py /destination/dir /source/dir
 ```
 

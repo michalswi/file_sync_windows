@@ -6,6 +6,7 @@ import sys
 from multiprocessing import Process, Queue
 import time
 from shutil import copy2
+import re
 
 #windows: without raw string -> error
 dir_base = r'C:\Users\szp\Desktop\backup_files'
@@ -60,10 +61,17 @@ def update_files():
     """ base on data from compare_dicts() it will update files """
     print("=== updating ===")
     for key, value in to_be_changed.items():
-        print(key)
-        key_base = key.replace('usb_files', 'backup_files')
+        print("src:", key)
+        #stupid windows, problem with \ vs \\
+        #key_src = re.sub(r'{}'.format(dir_usb) ,'', r'{}'.format(key), count=1)
+        key_src = key.replace(dir_usb, '')
+        key_base = os.path.join(dir_base + key_src)
+        print("dest:", key_base)
+        #os.path.join
         if not os.path.exists('\\'.join(key_base.split('\\')[:-1])):
-            os.makedirs('\\'.join(key_base.split('\\')[:-1]))        
+            print '\\'.join(key_base.split('\\')[:-1])
+            os.makedirs('\\'.join(key_base.split('\\')[:-1]))
+        print key_base
         copy2(key, key_base)
     print("=== updated ===")
 
@@ -96,3 +104,4 @@ if __name__=='__main__':
     fire()
   
     
+
