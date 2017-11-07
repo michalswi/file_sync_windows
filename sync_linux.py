@@ -6,6 +6,7 @@ import sys
 from multiprocessing import Process, Queue
 import time
 from shutil import copy2
+import re
 
 dir_base = r'{}'.format(sys.argv[1])
 dir_usb = r'{}'.format(sys.argv[2])
@@ -63,8 +64,10 @@ def update_files():
     print("=== updating ===")
     #https://stackoverflow.com/questions/123198/how-do-i-copy-a-file-in-python
     for key, value in to_be_changed.items():
-        print(key)
-        key_base = key.replace('usb_files', 'backup_files')
+        print("src:", key)
+        key_src = re.sub('{}'.format(dir_usb) ,'', '{}'.format(key), count=1)
+        key_base = os.path.join(dir_base + key_src)
+        print("dest:", key_base)
         # split.. : if you have '/dir1/dir2/file' it will remove 'file' and create '/dir1/dir2'
         if not os.path.exists("/".join(key_base.split('/')[:-1])):
             os.makedirs("/".join(key_base.split('/')[:-1]))

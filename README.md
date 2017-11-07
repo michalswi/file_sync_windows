@@ -12,7 +12,7 @@ dir_usb = r'<source>'
 
 python sync_windows.py 
 
-#LINUX way TO DO
+#LINUX way
 python sync_linux.py /destination/dir /source/dir
 ```
 

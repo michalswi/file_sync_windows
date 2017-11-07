@@ -67,11 +67,9 @@ def update_files():
         key_src = key.replace(dir_usb, '')
         key_base = os.path.join(dir_base + key_src)
         print("dest:", key_base)
-        #os.path.join
         if not os.path.exists('\\'.join(key_base.split('\\')[:-1])):
             print '\\'.join(key_base.split('\\')[:-1])
             os.makedirs('\\'.join(key_base.split('\\')[:-1]))
-        print key_base
         copy2(key, key_base)
     print("=== updated ===")
 
