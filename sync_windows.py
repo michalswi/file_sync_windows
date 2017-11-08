@@ -76,28 +76,30 @@ def update_files():
 def fire():
     """ run... """
     global a_base_dict, a_usb_dict
-
-    q = Queue()
-    q2 = Queue()
-    
-    p1 = Process(target=f_base, args=(q,))
-    p1.start()
-    p2 = Process(target=f_usb, args=(q2,))
-    p2.start()    
-    
-    a_base_dict = q.get()
-    a_usb_dict = q2.get()
-    
-    
-    p1.join()
-    p2.join()
-    
-    # 'if' statement is needed to not run 'update_files()' if there are no files to be updated
-    if compare_dicts():
-        update_files()
+    if os.path.exists(dir_base) and os.path.exists(dir_usb):
+        q = Queue()
+        q2 = Queue()
+        
+        p1 = Process(target=f_base, args=(q,))
+        p1.start()
+        p2 = Process(target=f_usb, args=(q2,))
+        p2.start()    
+        
+        a_base_dict = q.get()
+        a_usb_dict = q2.get()
+        
+        
+        p1.join()
+        p2.join()
+        
+        # 'if' statement is needed to not run 'update_files()' if there are no files to be updated
+        if compare_dicts():
+            update_files()
+        else:
+            print("=== completed ===")
     else:
-        print("=== completed ===")
-
+        sys.exit("Missing directories")
+        
 if __name__=='__main__':
     fire()
   
