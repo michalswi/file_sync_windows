@@ -87,8 +87,7 @@ def fire():
         
         a_base_dict = q.get()
         a_usb_dict = q2.get()
-        
-        
+         
         p1.join()
         p2.join()
         
