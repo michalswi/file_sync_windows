@@ -30,7 +30,9 @@ def f_base(q):
                 with open(path + r'\{}'.format(f), 'rb') as of:
                     fc = of.read()
                     base_dict[path + r'\{}'.format(f)]=( hashlib.md5(fc).hexdigest() )
+    b_d_len = len(base_dict.items())
     logger.info("\nBase dict length: {} \nBase count: {}".format(b_d_len, count))
+    print("\nBase dict length: {} \nBase count: {}".format(b_d_len, count))
     q.put(base_dict)
 
 def f_usb(q2):
@@ -44,7 +46,9 @@ def f_usb(q2):
                 with open(path + r'\{}'.format(f), 'rb') as of:
                     fc = of.read()
                     usb_dict[path + r'\{}'.format(f)]=( hashlib.md5(fc).hexdigest() )
+    u_d_len = len(usb_dict.items())                    
     logger.info("\nUSB dict length: {} \nUSB count: {}".format(u_d_len, count))
+    print("\nUSB dict length: {} \nUSB count: {}".format(u_d_len, count))
     q2.put(usb_dict) 
 
 def compare_dicts():
